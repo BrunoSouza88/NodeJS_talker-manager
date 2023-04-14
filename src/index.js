@@ -2,7 +2,8 @@ const express = require('express');
 
 const fs = require('fs').promises;
 
-const token = require('./utils/tokenGenerator');
+const tokenGenerator = require('./utils/tokenGenerator');
+const validateFields = require('./utils/validateFields');
 
 const app = express();
 app.use(express.json());
@@ -47,8 +48,9 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(talker);
 });
 
-app.post('/login', async (req, res) => {
-  if (req.body) {
-   return res.status(200).json({ token: `${token()}` });
-  }
+app.post('/login', validateFields, async (req, res) => {
+  const { email, password } = req.body;
+  const token = tokenGenerator();
+  const user = { email, password, token };
+  return res.status(200).json(user);
 });
