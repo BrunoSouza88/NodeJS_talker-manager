@@ -1,14 +1,20 @@
 const express = require('express');
 
-const fs = require('fs').promises;
-
 const tokenGenerator = require('./utils/tokenGenerator');
 const validateFields = require('./utils/validateFields');
+const validateToken = require('./utils/validations/validateToken');
+const validateName = require('./utils/validations/validateName');
+const validateAge = require('./utils/validations/validateAge');
+const validateTalk = require('./utils/validations/validateTalk');
+const validateWatchedAt = require('./utils/validations/validateWatchedAt');
+const validateTalkRate = require('./utils/validations/validateTalkRate');
+const writingFile = require('./utils/handleFile/writingFile');
+const readingFile = require('./utils/handleFile/readingFile');
 
 const app = express();
 app.use(express.json());
 
-const filePath = './src/talker.json';
+const filePath = 'src/talker.json';
 
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
@@ -22,14 +28,8 @@ app.listen(PORT, () => {
   console.log(`Online na porta ${PORT}`);
 });
 
-const readFile = async () => {
-  const file = await fs.readFile(filePath, 'utf-8');
-  const fileParsed = JSON.parse(file);
-  return fileParsed;
-};
-
 app.get('/talker', async (_req, res) => {
-  const talkers = await readFile();
+  const talkers = await readingFile(filePath);
 
   if (!talkers) {
     return res.status(200).send([]);
@@ -39,7 +39,7 @@ app.get('/talker', async (_req, res) => {
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
-  const talkers = await readFile();
+  const talkers = await readingFile(filePath);
   const talker = talkers.find((element) => Number(element.id) === Number(id));
 
   if (!talker) {
@@ -53,4 +53,30 @@ app.post('/login', validateFields, async (req, res) => {
   const token = tokenGenerator();
   const user = { email, password, token };
   return res.status(200).json(user);
+});
+
+app.post('/talker',
+  validateToken,
+  validateName,
+  validateAge,
+  validateTalk,
+  validateWatchedAt,
+  validateTalkRate,
+  async (req, res) => {
+  const { name, age, talk } = req.body;
+
+  const data = await readingFile(filePath);
+
+  const newTalker = { 
+    id: data.length + 1,
+    name,
+    age,
+    talk,
+  };
+
+  const newTalkers = [...data, newTalker];
+  
+  await writingFile(filePath, newTalkers);
+
+  return res.status(201).json(newTalker);
 });
