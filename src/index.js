@@ -107,3 +107,12 @@ app.put('/talker/:id',
   await writingFile(filePath, talkers);
   return res.status(200).json(talkers[talkerIndex]);
 });
+
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const { id } = req.params;
+
+    const talkers = await readingFile(filePath);
+    const newArray = talkers.filter((element) => Number(element.id) !== Number(id));
+    await writingFile(filePath, newArray);
+    return res.status(204).json();
+});
