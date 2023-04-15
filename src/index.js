@@ -37,6 +37,14 @@ app.get('/talker', async (_req, res) => {
     return res.status(200).json(talkers);
 });
 
+app.get('/talker/search/', validateToken, async (req, res) => {
+  const talkers = await readingFile(filePath);
+
+  const filteredTalker = talkers.filter((element) => element.name.includes(req.query.q));
+
+  return res.status(200).json(filteredTalker);
+});
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const talkers = await readingFile(filePath);
