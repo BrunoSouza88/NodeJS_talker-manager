@@ -10,7 +10,7 @@ const validateWatchedAt = require('./utils/validations/validateWatchedAt');
 const validateTalkRate = require('./utils/validations/validateTalkRate');
 const writingFile = require('./utils/handleFile/writingFile');
 const readingFile = require('./utils/handleFile/readingFile');
-const validateRateSearch = require('./utils/validations/validateRateSearch');
+// const validateRateSearch = require('./utils/validations/validateRateSearch');
 
 const app = express();
 app.use(express.json());
