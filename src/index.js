@@ -10,6 +10,7 @@ const validateWatchedAt = require('./utils/validations/validateWatchedAt');
 const validateTalkRate = require('./utils/validations/validateTalkRate');
 const writingFile = require('./utils/handleFile/writingFile');
 const readingFile = require('./utils/handleFile/readingFile');
+const validateRateSearch = require('./utils/validations/validateRateSearch');
 
 const app = express();
 app.use(express.json());
@@ -32,18 +33,38 @@ app.get('/talker', async (_req, res) => {
   const talkers = await readingFile(filePath);
 
   if (!talkers) {
-    return res.status(200).send([]);
+    return res.status(HTTP_OK_STATUS).send([]);
   } 
-    return res.status(200).json(talkers);
+    return res.status(HTTP_OK_STATUS).json(talkers);
 });
 
+// Requisito 8
 app.get('/talker/search/', validateToken, async (req, res) => {
+  const { q } = req.query;
+
   const talkers = await readingFile(filePath);
 
-  const filteredTalker = talkers.filter((element) => element.name.includes(req.query.q));
+  const filteredTalker = talkers.filter((element) => element.name.includes(q));
 
-  return res.status(200).json(filteredTalker);
+  return res.status(HTTP_OK_STATUS).json(filteredTalker);
 });
+
+// requisito 9
+// app.get('/talker/search', validateToken, validateRateSearch, async (req, res) => {
+// const { q, rate } = req.query;
+// const talkers = await readingFile(filePath);
+
+// if (rate && !q) {
+// const talker = talkers.filter((element) => element.talk.rate === Number(rate));
+// return res.status(HTTP_OK_STATUS).json(talker);
+// }
+
+// const filteredTalker = talkers
+// .filter((element) => element.name
+// .includes(q)).filter((element2) => element2.talk.rate === Number(rate));
+
+// return res.status(HTTP_OK_STATUS).json(filteredTalker);
+// });
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
@@ -53,14 +74,14 @@ app.get('/talker/:id', async (req, res) => {
   if (!talker) {
     return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   } 
-    return res.status(200).json(talker);
+    return res.status(HTTP_OK_STATUS).json(talker);
 });
 
 app.post('/login', validateFields, async (req, res) => {
   const { email, password } = req.body;
   const token = tokenGenerator();
   const user = { email, password, token };
-  return res.status(200).json(user);
+  return res.status(HTTP_OK_STATUS).json(user);
 });
 
 app.post('/talker',
@@ -113,7 +134,7 @@ app.put('/talker/:id',
     talk,
   };
   await writingFile(filePath, talkers);
-  return res.status(200).json(talkers[talkerIndex]);
+  return res.status(HTTP_OK_STATUS).json(talkers[talkerIndex]);
 });
 
 app.delete('/talker/:id', validateToken, async (req, res) => {
