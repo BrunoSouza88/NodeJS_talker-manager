@@ -12,6 +12,7 @@ const writingFile = require('./utils/handleFile/writingFile');
 const readingFile = require('./utils/handleFile/readingFile');
 const validateRateSearch = require('./utils/validations/validateRateSearch');
 const validateDateQuery = require('./utils/validations/validateDate');
+const xablau = require('./utils/validations/xablau');
 
 const app = express();
 app.use(express.json());
@@ -149,4 +150,22 @@ app.delete('/talker/:id', validateToken, async (req, res) => {
     const newArray = talkers.filter((element) => Number(element.id) !== Number(id));
     await writingFile(filePath, newArray);
     return res.status(204).json();
+});
+
+app.patch('/talker/rate/:id', validateToken, xablau, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+
+  const talkers = await readingFile(filePath);
+
+  console.log(talkers);
+  const talker = talkers.find((element) => element.id === Number(id));
+
+  talker.talk.rate = rate;
+
+  const newTalker = [...talkers, talker];
+
+  await writingFile(filePath, newTalker);
+
+  return res.status(204).end();
 });
