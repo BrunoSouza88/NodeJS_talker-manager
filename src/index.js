@@ -1,4 +1,5 @@
 const express = require('express');
+const talkerDB = require('./talkerDB');
 
 const tokenGenerator = require('./utils/tokenGenerator');
 const validateFields = require('./utils/validateFields');
@@ -40,17 +41,24 @@ app.get('/talker', async (_req, res) => {
     return res.status(HTTP_OK_STATUS).json(talkers);
 });
 
-// Requisito 8
-// app.get('/talker/search', validateToken, async (req, res) => {
-//   const { q } = req.query;
+app.get('/talker/db', async (req, res) => {
+  try {
+    const result = await talkerDB.getTalker();
+    const xablau666 = result[0].map((element) => ({
+      name: element.name,
+      age: element.age,
+      id: element.id,
+      talk: {
+        watchedAt: element.talk_watched_at,
+        rate: element.talk_rate,
+      },
+    }));
+    return res.status(HTTP_OK_STATUS).json(xablau666);
+  } catch (error) {
+    console.log(error.message);
+  }
+});
 
-//   const talkers = await readingFile(filePath);
-
-//   const filteredTalker = talkers.filter((element) => element.name.includes(q));
-//   return res.status(HTTP_OK_STATUS).json(filteredTalker);
-// });
-
-// requisito 9
 app.get('/talker/search',
   validateToken, validateRateSearch, validateDateQuery, async (req, res) => {
 const { q, rate, date } = req.query;
