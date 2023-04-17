@@ -10,7 +10,8 @@ const validateWatchedAt = require('./utils/validations/validateWatchedAt');
 const validateTalkRate = require('./utils/validations/validateTalkRate');
 const writingFile = require('./utils/handleFile/writingFile');
 const readingFile = require('./utils/handleFile/readingFile');
-// const validateRateSearch = require('./utils/validations/validateRateSearch');
+const validateRateSearch = require('./utils/validations/validateRateSearch');
+const validateDateQuery = require('./utils/validations/validateDate');
 
 const app = express();
 app.use(express.json());
@@ -33,38 +34,42 @@ app.get('/talker', async (_req, res) => {
   const talkers = await readingFile(filePath);
 
   if (!talkers) {
-    return res.status(HTTP_OK_STATUS).send([]);
+    return res.status(HTTP_OK_STATUS).json([]);
   } 
     return res.status(HTTP_OK_STATUS).json(talkers);
 });
 
 // Requisito 8
-app.get('/talker/search/', validateToken, async (req, res) => {
-  const { q } = req.query;
+// app.get('/talker/search', validateToken, async (req, res) => {
+//   const { q } = req.query;
 
-  const talkers = await readingFile(filePath);
+//   const talkers = await readingFile(filePath);
 
-  const filteredTalker = talkers.filter((element) => element.name.includes(q));
-
-  return res.status(HTTP_OK_STATUS).json(filteredTalker);
-});
+//   const filteredTalker = talkers.filter((element) => element.name.includes(q));
+//   return res.status(HTTP_OK_STATUS).json(filteredTalker);
+// });
 
 // requisito 9
-// app.get('/talker/search', validateToken, validateRateSearch, async (req, res) => {
-// const { q, rate } = req.query;
-// const talkers = await readingFile(filePath);
+app.get('/talker/search',
+  validateToken, validateRateSearch, validateDateQuery, async (req, res) => {
+const { q, rate, date } = req.query;
+const talkers = await readingFile(filePath);
+let filteredTalker = talkers;
 
-// if (rate && !q) {
-// const talker = talkers.filter((element) => element.talk.rate === Number(rate));
-// return res.status(HTTP_OK_STATUS).json(talker);
-// }
+if (q) {
+  filteredTalker = filteredTalker.filter((element) => element.name.includes(q));
+}
 
-// const filteredTalker = talkers
-// .filter((element) => element.name
-// .includes(q)).filter((element2) => element2.talk.rate === Number(rate));
+if (rate) {
+  filteredTalker = filteredTalker.filter((element) => element.talk.rate === Number(rate));
+}
 
-// return res.status(HTTP_OK_STATUS).json(filteredTalker);
-// });
+if (date) {
+  filteredTalker = filteredTalker.filter((element) => element.talk.watchedAt === date);
+}
+
+return res.status(HTTP_OK_STATUS).json(filteredTalker);
+});
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
