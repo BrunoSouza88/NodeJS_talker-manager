@@ -1,4 +1,4 @@
-const xablau = async (req, res, next) => {
+const validateRateEdit = async (req, res, next) => {
   const { rate } = req.body;
 
   if (rate === undefined) {
@@ -12,4 +12,4 @@ const xablau = async (req, res, next) => {
   next();
 };
 
-module.exports = xablau;
+module.exports = validateRateEdit;
