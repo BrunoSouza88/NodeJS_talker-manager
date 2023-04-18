@@ -148,7 +148,6 @@ router.patch('/talker/rate/:id', validateToken, validateRateEdit, async (req, re
 
   const talkers = await readingFile(filePath);
 
-  console.log(talkers);
   const talker = talkers.find((element) => element.id === Number(id));
 
   talker.talk.rate = rate;
